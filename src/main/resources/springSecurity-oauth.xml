@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:security="http://www.springframework.org/schema/security"
+xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/security/oauth2
+		http://www.springframework.org/schema/security/spring-security-oauth2.xsd">
+	
+	<!-- 拦截/oauth/token的请求（oauth server） -->
+	<security:http pattern="/oauth/token" create-session="stateless" authentication-manager-ref="oauth2AuthenticationManager" use-expressions="false">  
+	    <security:intercept-url pattern="/oauth/token" access="IS_AUTHENTICATED_FULLY"/>
+	    <security:anonymous enabled="false"/>
+	    <security:http-basic entry-point-ref="oauth2AuthenticationEntryPoint"/>  
+	    <security:custom-filter ref="clientCredentialsTokenEndpointFilter" before="BASIC_AUTH_FILTER"/>  
+	    <security:access-denied-handler ref="oauth2AccessDeniedHandler"/>  
+	</security:http>
+	
+	<!-- resource server -->
+	<security:http pattern="/cpquery/**" create-session="never" entry-point-ref="oauth2AuthenticationEntryPoint" access-decision-manager-ref="oauth2AccessDecisionManager" use-expressions="false">  
+	    <security:anonymous enabled="false"/>
+	    <security:intercept-url pattern="/cpquery/**" access="ROLE_USER,SCOPE_READ"/>
+	  	<!-- 应用定义的resource server -->
+	    <security:custom-filter ref="cpqueryResourceServer" before="PRE_AUTH_FILTER"/>
+	    <security:access-denied-handler ref="oauth2AccessDeniedHandler"/>
+	</security:http>
+	
+	<security:http disable-url-rewriting="true" authentication-manager-ref="authenticationManager" use-expressions="false">  
+	    <security:intercept-url pattern="/login.jsp*" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+	    <security:intercept-url pattern="/oauth/**" access="ROLE_USER"/>  
+	    <security:form-login authentication-failure-url="/login.jsp?authentication_error=1" default-target-url="/index.jsp" login-page="/login.jsp" authentication-success-handler-ref="authenticationSuccessHandler"/>
+	    <security:logout logout-success-url="/index.jsp" logout-url="/logout" delete-cookies="true" invalidate-session="true"/>
+	    <security:intercept-url pattern="/**" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+	</security:http>
+	
+	<!-- ************************************************************************************************************ -->
+	<!-- tokenService配置-token的存储服务 -->
+	<bean id="tokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">  
+	    <property name="tokenStore" ref="tokenStore"/>  
+	    <!-- 允许刷新token -->
+	    <property name="supportRefreshToken" value="true"/>
+	</bean>
+	<!-- 存储方式 -->
+	<bean id="tokenStore" class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">  
+	    <constructor-arg index="0" ref="dataSource"/>
+	</bean>
+	<!-- ************************************************************************************************************ -->
+	<!-- 认证管理 -client -->
+	<security:authentication-manager id="oauth2AuthenticationManager">  
+	    <security:authentication-provider user-service-ref="oauth2ClientDetailsUserService"/>  
+	</security:authentication-manager>
+	<!-- 提供client的认证信息 -->
+	<bean id="oauth2ClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">  
+	    <constructor-arg ref="clientDetailsService"/>
+	</bean>
+	<!-- client信息查询-通过数据库中获取值 （封装client数据）-->
+	<bean id="clientDetailsService" class="org.springframework.security.oauth2.provider.client.JdbcClientDetailsService">  
+	    <constructor-arg index="0" ref="dataSource"/>  
+	</bean>
+	
+	<bean id="authenticationSuccessHandler" class="org.ipph.web.security.CpqueryAuthenticationSuccessHandler"></bean>
+	
+	<!-- 自定义认证服务实现类 -->
+	<bean id="cpqueryUserDetailsService" class="org.ipph.web.security.CpqueryUserDetailsService"></bean>
+	<!-- 用户加密服务提供类 -->
+	<bean id="cpqueryPwdEncoding" class="org.ipph.web.security.CpqueryPwdEncoding"></bean>
+	
+	<!-- 认证管理 -->
+	<security:authentication-manager id="authenticationManager">
+		<!-- 配置自定义的认证服务提供者-返回认证用户信息 -->
+		<security:authentication-provider user-service-ref="cpqueryUserDetailsService">
+			<!-- 加密方式 -->
+			<!-- <security:password-encoder ref="cpqueryPwdEncoding"></security:password-encoder> -->
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+	<!-- 该Filter将作用于Spring Security的chain 链条中 -->
+	<bean id="clientCredentialsTokenEndpointFilter" class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">  
+	    <property name="authenticationManager" ref="oauth2AuthenticationManager"/>  
+	</bean>
+	
+	<!-- ************************************************************************************************************ -->
+	<bean id="oauth2AuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint"/>
+
+	<!-- ************************************************************************************************************ -->
+	<!-- 全局配置信息 -->
+	<!-- 访问拒绝处理器 -->
+	<bean id="oauth2AccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler"/>
+	<!-- 实现client是否可信任的关键点 -->
+	<bean id="oauthUserApprovalHandler" class="org.springframework.security.oauth2.provider.approval.DefaultUserApprovalHandler"/>
+	
+	<!-- ************************************************************************************************************ -->
+	<!-- authorization-server配置 ，该元素下的每个标签都代表一个authorized-grant-type-->
+	<oauth2:authorization-server client-details-service-ref="clientDetailsService" token-services-ref="tokenServices" user-approval-handler-ref="oauthUserApprovalHandler">  
+	    <oauth2:authorization-code/>  
+	    <oauth2:implicit/>  
+	    <oauth2:refresh-token/>  
+	    <oauth2:client-credentials/>  
+	    <oauth2:password/>  
+	</oauth2:authorization-server>
+	
+	<!-- ************************************************************************************************************ -->
+	<!-- 决策器 -->
+	<bean id="oauth2AccessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">  
+	    <constructor-arg>  
+	        <list>  
+	            <bean class="org.springframework.security.oauth2.provider.vote.ScopeVoter"/>  
+	            <bean class="org.springframework.security.access.vote.RoleVoter"/>  
+	            <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>  
+	        </list>
+	    </constructor-arg>
+    </bean>
+    
+    <!-- ************************************************************************************************************ -->
+    <!-- resource-server配置-每个resource-id的值必须在对应的ClientDetails中resourceIds值中存在 -->
+    <oauth2:resource-server id="cpqueryResourceServer" resource-id="cpquery-resource" token-services-ref="tokenServices"/>
+    
+</beans>

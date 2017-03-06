@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:security="http://www.springframework.org/schema/security"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security.xsd">
+		
+	<!--  ********************************************************************************************************************************* -->
+	<!-- 静态资源路径访问 -->
+	<security:http pattern="/css/**" security="none"/>
+	<!-- <security:http pattern="/login.jsp*" security="none"/> -->
+	
+	<security:http use-expressions="false">
+		<security:intercept-url pattern="/login.jsp*" access="IS_AUTHENTICATED_ANONYMOUSLY"/>
+		<!-- 需授权拦截资源路径 -->
+		<security:intercept-url pattern="/cpquery/**" access="ROLE_USER" requires-channel="https"/>
+		<!-- 拦截匹配所有路径，在具体资源路径下方配置 -->
+		<security:intercept-url pattern="/**" access="ROLE_USER" />
+		<!-- form表单登录配置 -->
+		<security:form-login login-page='/login.jsp' default-target-url="/index.jsp" authentication-failure-url="/login.jsp?failed=true"/>
+		<!-- 登出路径 -->
+		<security:logout logout-url="/logout" delete-cookies="true" invalidate-session="true"/>
+		<!-- csrf跨站攻击 -->
+		<!-- <security:csrf disabled="true"/> -->
+		<!-- 记住我 -->
+		<security:remember-me data-source-ref="dataSource" user-service-ref="cpqueryUserDetailsService"/>
+		<!-- 访问拒绝的统一处理 -->
+		<security:access-denied-handler ref="cpqueryAccessDeniedHandler"/>
+		<!-- 配置过滤器-->
+		<security:custom-filter before="FILTER_SECURITY_INTERCEPTOR" ref="filterSecurityInterceptor" />
+	</security:http>
+	
+	<bean id="cpqueryAccessDeniedHandler" class="org.ipph.web.security.CpqueryAccessDeniedHandler"></bean>
+	
+	<!--  ********************************************************************************************************************************* -->
+	<!-- 认证服务实现类 -->
+	<bean id="cpqueryUserDetailsService" class="org.ipph.web.security.CpqueryUserDetailsService"></bean>
+	<!-- 用户加密服务提供类 -->
+	<bean id="cpqueryPwdEncoding" class="org.ipph.web.security.CpqueryPwdEncoding"></bean>
+	
+	<!-- 认证管理 -->
+	<security:authentication-manager id="authenticationManager">
+		<!-- 配置自定义的认证服务提供者-返回认证用户信息 -->
+		<security:authentication-provider user-service-ref="cpqueryUserDetailsService">
+			<!-- 加密方式 -->
+			<security:password-encoder ref="cpqueryPwdEncoding"></security:password-encoder>
+		</security:authentication-provider>
+		
+		<security:authentication-provider>
+			<security:user-service>
+				<security:user name="test" authorities="ROLE_USER"/>
+			</security:user-service>
+		</security:authentication-provider>
+	</security:authentication-manager>
+	
+	<!--  ********************************************************************************************************************************* -->
+	<!-- 自定义授权决策，使用该决策器后，配置在intercept-url的acesss属性值都将失效 ，而是要securityMetadataSource为请求设置权限角色-->
+	<bean id="filterSecurityInterceptor" class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<!-- 需要从authenticationManager中获取用户的认证信息 -->
+		<property name="authenticationManager" ref="authenticationManager"/>
+		<!-- 用户访问授权 -->
+		<property name="accessDecisionManager" ref="accessDecisionManager"/>
+		<!-- 访问资源所需角色集合 -->
+		<property name="securityMetadataSource" ref="securityMetadataSource"/>
+	</bean>
+	
+	<!-- 访问决策器，决定某个用户具有的角色，是否有足够的权限去访问某个资源 -->
+	<bean id="accessDecisionManager" class="org.ipph.web.security.CpqueryAccessDecisionManager" />
+	
+	<!-- 封装资源需要的授权角色集合 -->
+	<bean id="securityMetadataSource" class="org.ipph.web.security.CpquerySecurityMetadataSource" scope="singleton" >
+		<!-- 暂不支持正则 -->
+		<property name="anonymousUrls">
+			<set>
+				<value>/login.jsp</value>
+			</set>
+		</property>
+	</bean>
+	<!--  ********************************************************************************************************************************* -->
+</beans>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+           http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.2.xsd">
+    <!-- 生成获取spring中对象的实例类 ,spring容器完成后，调用该实例的setApplicationContext方法-->
+    <bean class="org.ipph.util.spring.SpringContextHolder" lazy-init="false" />
+    
+    <context:component-scan base-package="org.spider.model" />
+    <context:component-scan base-package="org.spider.service" />
+    <context:component-scan base-package="org.spider.dao" />
+    
+    <context:component-scan base-package="org.ipph.web.security"></context:component-scan>
+    
+    <!-- 单独加载一个属性文件 -->
+    <bean id="configproperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+          <property name="location" value="classpath:app.properties"/>
+    </bean>
+    
+     <!-- <bean id="propertyConfigurer"  class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> -->
+     <bean id="propertyConfigurer" class="org.ipph.util.spring.PlaceholderConfigurerUtil">
+     	<property name="properties" ref="configproperties"></property>
+         <property name="locations">
+         	<list>
+         		<value>classpath:datasource.properties</value>
+         	</list>
+         </property>
+    </bean>
+      
+    <!-- 数据源配置 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driverClassName}"/>
+		<property name="jdbcUrl" value="${jdbc.url}"/>
+		<property name="user" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<!-- 初始化连接池时连接数量 -->
+		<property name="initialPoolSize" value="${db.initialPoolSize}" />
+		<!-- 池中最小数据库连接数量 -->
+        <property name="minPoolSize" value="${db.minPoolSize}" />
+        <!-- 池中最大数据库连接数量 -->
+        <property name="maxPoolSize" value="${db.maxPoolSize}" />
+         <!-- 连接有效时间，连接超过多少秒未使用，则该连接丢弃 ，单位秒-->
+        <property name="maxIdleTime" value="${db.maxIdleTime}" />
+        <!-- 允许连接池最大生成多少个PreparedStatement对象 -->
+        <property name="maxStatements" value="${db.maxStatements}"/>
+        <!-- 连接用完时，一次产生的新数据库连接数量 -->
+        <property name="acquireIncrement" value="${db.acquireIncrement}"/>
+        <!-- 获取连接失败后再尝试多少次，再失败则返回DAOException异常 -->
+        <property name="acquireRetryAttempts" value="${db.acquireRetryAttempts}"/>
+        <!-- 获取下一次连接时最短间隔多少毫秒，有助于提高性能 ，单位毫秒-->
+        <property name="acquireRetryDelay" value="${db.acquireRetryDelay}"/>
+        <!-- 获取新连接的超时时间为多少毫秒，单位毫秒 -->
+        <property name="checkoutTimeout" value="${db.checkoutTimeout}"/>
+	</bean>
+	
+	<!-- mybatis数据连接配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">  
+       <property name="configLocation" value="classpath:configuration.xml" />
+       <property name="dataSource" ref="dataSource" />
+       <property name="mapperLocations">
+       		<list>
+       			<value>classpath:mapper/org/spider/*.xml</value>
+       			<value>classpath:org/ipph/web/security/mapper/*.xml</value>
+       		</list>
+       </property>
+	</bean>
+	
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">   
+      	<constructor-arg index="0" ref="sqlSessionFactory" />   
+	</bean>
+	
+	<!-- jdbcTemplate配置数据源 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+	
+    <!-- 配置事务 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 使用aop的方式来管理service中的事务 -->
+	<aop:config proxy-target-class="true">
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* org.spider.service..*.*(..))"  />
+	</aop:config>
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="nextId" propagation="REQUIRES_NEW"/>
+		  	<tx:method name="get*" read-only="true"/>
+			<tx:method name="is*" read-only="true"/>
+			<tx:method name="find*" read-only="true"/>
+			<tx:method name="*" isolation="READ_COMMITTED" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
+</beans>

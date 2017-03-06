@@ -1,0 +1,2183 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "专利检索api"
+    },
+    "schemes": [
+        "http"
+    ],
+    "host": "http://114.251.8.193/web/api/patent/114.251.8.193",
+    "basePath": "",
+    "paths": {
+        "/api/patent/search/expression": {
+            "get": {
+                "summary": "表达式检索",
+                "description": "通过传递过来的表达式进行检索，根据传递过来的字段、逻辑符的组对传递给后台，检索时对表达式做效验，若表达式有误则不允许检索。其中包含的字段有：日期类型：公布日、申请日、进入国家日、最早优先权日；号码类型：申请号、公布号、优先权、最早优先权、简单同族、引证文献；相关人类型：申请人、申请人地址、发明人、专利权人、专利权人地址、相关权利人、代理人、代理机构、代理人地址、审查员、主审员、申请人区域代码；文本类型：名称、摘要和说明、主权项、权利要求书、说明书全文、名称+摘要和说明、名称+摘要和说明+权利要求书、名称+摘要和说明+权利要求书+说明书全文、关键词、技术领域、背景技术、发明内容、具体实施方式、附图说明。<p>排序字段，专利支持排序的字段：专利强度(VU)、申请日(AD)、公布日(PD)、最早优先权日(EPRD)、简单同族数量(SFC)、引证数量(CIPC)、被引证数量(CIGC)、发明人数量(INCO)、IPC小类数量(IPCSGC)、权利要求数量(CLN)、说明书页数(DEPC)、附图页数(DC)、转让次数(TCC)、许可次数(PCC)、质押次数(PPC)。</p>",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/express"
+                    },
+                    {
+                    	"$ref":"#/parameters/page"
+                    },
+                    {
+                    	"$ref":"#/parameters/sort_column"
+                    },
+		            {
+		            	"$ref": "#/parameters/page_row"
+		          	}
+                ],
+                "tags": [
+                    "表达式检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "根据表达式检索到的专利的列表",
+                        "schema": {
+                            "type": "array",
+                            "items":{
+                               	"$ref": "#/definitions/ListPatent"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/search/synonyms": {
+            "get": {
+                "summary": "同义词检索",
+                "description": "根据用户输入的文本类型的字段进行同义词检索，根据用户输入的文本类型字段进行同义联想，将结果返回出来后，做检索，其中，支持同义词检索的名称、主权项、权利要求书、说明书全文、关键词、技术领域、背景技术、发明内容、附图说明、具体实施方式、名称+摘要和说明、名称+摘要和说明+权利要求书、名称+摘要和说明+权利要求书+说明书全文、名称+摘要和说明+主权项。",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/express"
+                    }
+                ],
+                "tags": [
+                    "同义词转换"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "同义词转换的结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/SynonymsResult"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/search/cross/lang": {
+            "get": {
+                "summary": "跨语言检索",
+                "description": "跨语言检索支持中文和英文检索，用户若是输入中文，则在系统中联想成英文后，将该字段的中文和英文含义一并带入检索，反之也可以。其中支持跨语言的字段有：名称、主权项、权利要求书、说明书全文、关键词、技术领域、背景技术、发明内容、附图说明、具体实施方式、名称+摘要和说明、名称+摘要和说明+权利要求书、名称+摘要和说明+权利要求书+说明书全文、名称+摘要和说明+主权项",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/express"
+                    }
+                ],
+                "tags": [
+                    "跨语言转换"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "跨语言转换的结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/CrossResult"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/statistics": {
+            "get": {
+                "summary": "专利分类统计",
+                "description": "通过表达式的传递，系统为用户推送结果中包含能够统计出数量的字段。其中包括，专利类型（PDT）、中国当前权利状态（LSBCN）、国外当前权利状态（LSBFO）、IPC、申请年（AY）、公布年（PY）、专利权人（ASO）、发明人（INO）、最早优先权年（EPRY）、CPC（CPC）、洛迦诺（LC）、申请人（APO）、申请人类型（APCL）、专利权人类型（ASCL）、代理机构（CRO）、代理人（AGO）、审查员（EXO）、关键词（FTKO）、受理国（AC）、来源国（AP1A）、中国省份（APPPC）、同族国别（SFCL）、PCT专利（PCT）、分案申请（DP）、复审决定（PRES）、无效专利（PINS）、法院判决（PLI）、专利转让（TS）、专利许可（LS）、专利质押（PS）、最早优先权（EPRNO）。最多十个。（前20得统计结果）",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/express"
+                    },
+                    {
+                    	"$ref": "#/parameters/categoryColumn"
+                    }
+                ],
+                "tags": [
+                    "专利分类统计"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回分类统计结果中能够统计出数量的字段。",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/StatisticsResult"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/detail/catalog": {
+            "get": {
+                "summary": "专利详细信息",
+                "description": "当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的著录项信息，著录项信息包含以下字段：申请号、公布号、申请日 文献公布日、申请人、发明人、申请人地址、申请人区域代码、专利权人、CPC、IPC、UC、FI、 Fterm、优先权、代理机构、代理人 审查员、国际申请、国际公布、进入国家日期 、分案申请。默认附其他详情项链接；同族专利：当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的同族专利，同族专利返回以下几个内容：同族数量、申请号、公布号、公布日、名称、优先权；引证与被引证专利信息：当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的引证专利，引证专利返回以下几个内容：引证数量、申请号、公布号、公布日、名称、引证类型；国知局信息：当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的国知局信息，国知局信息分为收费信息、通知书发文信息、专利证书发文信息，收费信息要有费用金额、费用种类、挂号、收据号、缴费人信息、处理状态、缴费日，通知书发文信息要有发文日、挂号、收件人姓名、通知书类型、通知书类型中文说明，专利证书发文信息要有发文日、挂号、收件人姓名、收件人地址、证书号；法律状态：当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的法律状态，法律状态含有法律状态的信息包括状态的时间，法律状态的代码；专利强度信息：当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的专利强度，专利强度的分数是根据稳定性、保护范围、技术应用、技术质量等方面进行评估的。<span>返回的专利IPCQ分类数据中，包含多条专利IPCQ分类信息，对应的节点是：ipcqInfo(该节点是一个集合)。</span><br><span>返回的优先权数据中，包含多条优先权信息，对应的节点是：priority(该节点是一个集合)。</span><br><span>返回的专利ipcr分类数据中，包含多条专利ipcr分类信息，对应的节点是：ipcrInfo(该节点是一个集合)。</span><br><span>返回的专利cpc分类数据中，包含多条专利cpc分类信息，对应的节点是：cpcInfo(该节点是一个集合)。</span><br><span>返回的专利申请人数据中，包含多条专利申请人信息，对应的节点是：applicantInfo(该节点是一个集合)。</span><br><span>返回的专利发明人信息表数据中，包含多条专利发明人信息表信息，对应的节点是：inventorInfo(该节点是一个集合)。</span><br><span>返回的代理人数据中，包含多条代理人信息，对应的节点是：agentInfo(该节点是一个集合)。</span><br><span>返回的专利权人数据中，包含多条专利权人信息，对应的节点是：assigneeInfo(该节点是一个集合)。</span><br><span>返回的当前专利权人数据中，包含多条当前专利权人信息，对应的节点是：currentAssigneeInfo(该节点是一个集合)。</span><br><span>返回的审查员数据中，包含多条审查员信息，对应的节点是：examiner(该节点是一个集合)。</span><br><span>返回的pct指定国数据中，包含多条pct指定国信息，对应的节点是：pctCountryInfo(该节点是一个集合)。</span><br><span>返回的专利摘要数据中，包含多条专利摘要信息，对应的节点是：absInfo(该节点是一个集合)。</span><br><span>返回的权利要求书数据中，包含多条权利要求书信息，对应的节点是：claimInfo(该节点是一个集合)。</span><br><span>返回的说明书数据中，包含多条说明书信息，对应的节点是：desInfo(该节点是一个集合)。</span><br><span>返回的专利文献关键词数据中，包含多条专利文献关键词信息，对应的节点是：dockeyWords(该节点是一个集合)。</span><br><span>返回的简单同族数据中，包含多条简单同族信息，对应的节点是：familySims(该节点是一个集合)。</span><br><span>返回的扩展同族数据中，包含多条扩展同族信息，对应的节点是：familyExts(该节点是一个集合)。</span><br><span>返回的同族申请文献数据中，包含多条同族申请文献信息，对应的节点是：familyPatDocs(该节点是一个集合)。</span><br><span>返回的法律状态公告数据中，包含多条法律状态公告信息，对应的节点是：prsseqInfos(该节点是一个集合)。</span><br><span>返回的专利转移数据中，包含多条专利转移信息，对应的节点是：transferInfos(该节点是一个集合)。</span><br><span>返回的专利许可数据中，包含多条专利许可信息，对应的节点是：permissionInfos(该节点是一个集合)。</span><br><span>返回的专利质押保全数据中，包含多条专利质押保全信息，对应的节点是：pledgeInfos(该节点是一个集合)。</span><br><span>返回的专利引证数据中，包含多条专利引证信息，对应的节点是：cits(该节点是一个集合)。</span><br><span>返回的被引证数据中，包含多条被引证信息，对应的节点是：citByRefds(该节点是一个集合)。</span><br><span>返回的非专利引证数据中，包含多条非专利引证信息，对应的节点是：notCits(该节点是一个集合)。</span><br><span>返回的无效著录数据中，包含多条无效著录信息，对应的节点是：invalidBibInfos(该节点是一个集合)。</span><br><span>返回的诉讼著录数据中，包含多条诉讼著录信息，对应的节点是：dicBibInfos、feeNotices、feePatentCertificates、feePaymentInformations、examinerAssiants、fiInfos(这些节点是一个集合)。</span><br><span>返回的专利NC分类数据中，包含多条专利NC分类信息，对应的节点是：ncInfos(该节点是一个集合)。</span><br><span>返回的本国外观分类数据中，包含多条本国外观分类信息，对应的节点是：ndcInfos(该节点是一个集合)。</span><br><span>返回的专利UC分类数据中，包含多条专利UC分类信息，对应的节点是：ucInfos(该节点是一个集合)。</span><br><span>返回的专利Fterm分类数据中，包含多条专利Fterm分类信息，对应的节点是：ftInfos(该节点是一个集合)。</span><br><span>返回的保藏编号以及日期字段表数据中，包含多条保藏编号以及日期字段表信息，对应的节点是：biologicals(该节点是一个集合)。</span>",
+                "parameters": [
+					{
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/pid"
+                    },
+                    {
+                        "$ref": "#/parameters/pno"
+                    },
+                    {
+                    	"$ref": "#/parameters/lang"
+                    }
+                ],
+                "tags": [
+                    "专利详细信息"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回专利的详细信息",
+                        "schema": {
+                            "$ref": "#/definitions/PatentDetail"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/detail/law": {
+            "get": {
+                "summary": "法律状态",
+                "description": "当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的法律状态，法律状态含有法律状态的信息包括状态的时间，法律状态的代码。",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+                        "$ref": "#/parameters/pid"
+                    }
+                ],
+                "tags": [
+                    "法律状态"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回该专利的法律状态的信息",
+                        "schema": {
+                            "$ref": "#/definitions/LawResult"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/search/intelligence": {
+            "get": {
+                "summary": "专利智能检索",
+                "description": "根据用户的输入条件，将输入内容筛选出来，文本内容自然对应的有文本型字段做匹配，数值型字段自然有数值型做匹配，混合型字段自然有混合型做匹配，默认检索库为全库。其中，支持智能检索的专利字段有文本型：申请人、发明人、名称；混合型：申请号、公布号、IPC、CPC、US、FI、FTERM、洛迦诺；日期型：公布日、申请日。<p>排序字段，专利支持排序的字段：专利强度(VU)、申请日(AD)、公布日(PD)、最早优先权日(EPRD)、简单同族数量(SFC)、引证数量(CIPC)、被引证数量(CIGC)、发明人数量(INCO)、IPC小类数量(IPCSGC)、权利要求数量(CLN)、说明书页数(DEPC)、附图页数(DC)、转让次数(TCC)、许可次数(PCC)、质押次数(PPC)。</p>",
+                "parameters": [
+                    {
+			            "$ref": "#/parameters/clientId"
+			        },
+			        {
+			            "$ref": "#/parameters/access_token"
+			        },
+			        {
+			            "$ref": "#/parameters/scope"
+			        },
+                    {
+	           			"$ref": "#/parameters/text"
+                    },
+                    {
+                        "$ref": "#/parameters/page"
+                    },
+                    {
+                    	"$ref":"#/parameters/sort_column"
+                    },
+		            {
+		            	"$ref": "#/parameters/page_row"
+		          	}
+                ],
+                "tags": [
+                    "专利智能检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回专利智能检索的结果",
+                        "schema": {
+                            "$ref": "#/definitions/ListPatent"
+                        }
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+	    "/api/patent/related": {
+	            "get": {
+	                "summary": "专利相关数据",
+	                "description": "当用户使用PID相关能够精确检索处一条专利数据时，系统将推送出该专利的相关数据，包括专利、商标、期刊、标准、复审无效、裁判文书、法律法规。将相关类型的相关内容提供出来。",
+	                "parameters": [
+	                    {
+			            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+	                    {
+		           			"$ref": "#/parameters/pid"
+	                    }
+	                ],
+	                "tags": [
+	                    "专利相关数据"
+	                ],
+	                "responses": {
+	                    "200": {
+	                        "description": "返回专利相关数据的结果",
+	                        "schema": {
+	                            "$ref": "#/definitions/RelatedResult"
+	                        }
+	                    },
+	                    "default": {
+	                        "description": "Unexpected error",
+	                        "schema": {
+	                            "$ref": "#/definitions/Error"
+	                        }
+	                    }
+	                }
+	            }
+	        },
+	    	"/api/patent/download": {
+	            "get": {
+	                "summary": "PDF下载",
+	                "description": "通过该接口可为用户提供专利的PDF下载，为离线浏览做出便利的接口。",
+	                "parameters": [
+	                    {
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+	                    {
+		           			"$ref": "#/parameters/pid"
+	                    },
+	                    {
+	                    	"$ref": "#/parameters/pns"
+	                    }
+	                ],
+	                "tags": [
+	                    "PDF下载"
+	                ],
+	                "responses": {
+	                    "200": {
+	                        "description": "返回一个PDF文件的URL",
+	                        "schema": {
+	                            "$ref": "#/definitions/PDFDownload"
+	                        }
+	                    },
+	                    "default": {
+	                        "description": "Unexpected error",
+	                        "schema": {
+	                            "$ref": "#/definitions/Error"
+	                        }
+	                    }
+	                }
+	            }
+	        },
+	         "/api/patent/classification/ipc": {
+            "get": {
+                "summary": "IPC分类表查询",
+                "description": "根据用户调用IPC的接口，得到IPC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或者内容（例如分类号：01，内容：计算机）",
+				            "type": "string",
+				            "required": true
+                    },
+                    {
+				            "name": "language",
+				            "in": "query",
+				            "description": "语言类型（1：中文，2：英文）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "IPC分类表检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IPC分类表检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "IPC分类表检索结果",
+					            "properties": {
+					                "simple_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "zh_title_text": {
+					                    "type": "string",
+					                    "description": "中文名称"
+					                },
+					                "en_title_text":{
+					                 	"type": "string",
+					                    "description": "英文名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+          "/api/patent/classification/cpc": {
+            "get": {
+                "summary": "CPC分类查询",
+                "description": "根据用户调用CPC的接口，得到CPC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或者内容（例如分类号：01，内容：for aerating）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "CPC分类检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "CPC分类检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "CPC分类检索结果",
+					            "properties": {
+					                "classification_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "标题名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+         "/api/patent/classification/uc": {
+            "get": {
+                "summary": "UC代码集查询",
+                "description": "根据用户调用UC的接口，得到UC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或者内容（例如分类号：01，内容：Inker）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "UC代码集检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UC代码集检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "UC代码集检索结果",
+					            "properties": {
+					                "symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "标题名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/patent/classification/fi": {
+            "get": {
+                "summary": "FI代码集查询",
+                "description": "根据用户调用FI的接口，得到FI所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或内容（例如内容：A）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "language",
+				            "in": "query",
+				            "description": "语言类型（2：英文，3：日文）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "FI代码集检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FI代码集检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "FI代码集检索结果",
+					            "properties": {
+					                "symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "number2_text": {
+					                    "type": "string",
+					                    "description": "fenl"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文标题名称"
+					                },
+					                "jp_title_text": {
+					                    "type": "string",
+					                    "description": "日文标题名称"
+					                }
+					                
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+         "/api/patent/classification/f/term": {
+            "get": {
+                "summary": "FTerm代码集查询",
+                "description": "根据用户调用FI的接口，得到FI所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或者内容（例如内容：A）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "language",
+				            "in": "query",
+				            "description": "语言类型（2：英文，3：日文）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "FTerm代码集检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FTerm代码集检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "FTerm代码集检索结果",
+					            "properties": {
+					                "symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "jp_title_text": {
+					                    "type": "string",
+					                    "description": "日文标题名称"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文标题名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+         "api/patent/classification/loc": {
+            "get": {
+                "summary": "洛迦诺代码集查询",
+                "description": "根据用户调用洛迦诺的接口，得到洛迦诺所有的代码集，可进行展开、收起，查询筛选等多种方式的使用。",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "text",
+				            "in": "query",
+				            "description": "分类号或者内容（例如分类号：01，内容：药品）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "language",
+				            "in": "query",
+				            "description": "语言类型（1：中文，2：英文）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page",
+				            "in": "query",
+				            "description": "当前页码（例如：1）",
+				            "type": "string",
+				            "required": true
+                    },
+                     {
+				            "name": "page_row",
+				            "in": "query",
+				            "description": "每页数据量（默认50条，可以不输入，也可以自定义，例如：10）",
+				            "type": "string",
+				            "required": false
+                    }
+                    
+                ],
+                "tags": [
+                    "洛迦诺代码集检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "洛迦诺代码集检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "洛迦诺代码集检索结果",
+					            "properties": {
+					                "classid": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "id": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "zhclassname": {
+					                    "type": "string",
+					                    "description": "中文标题名称"
+					                },
+					                "enclassname": {
+					                    "type": "string",
+					                    "description": "英文标题名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+	      "/api/patent/classification/cpc/ipc": {
+            "get": {
+                "summary": "IPC-CPC分类对照查询",
+                "description": "根据用户调用CPC-IPC的接口，得到CPC-IPC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "symbol",
+				            "in": "query",
+				            "description": "分类号（例如：B01F1/00）",
+				            "type": "string",
+				            "required": true
+                    }               
+                    
+                ],
+                "tags": [
+                    "IPC-CPC分类对照检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IPC-CPC分类对照检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "IPCCPC分类对照检索结果",
+					            "properties": {
+					                "simple_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文标题名称"
+					                },
+					                "zh_title_text": {
+					                    "type": "string",
+					                    "description": "中文标题名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },    
+	        "/api/patent/classification/uc/ipc": {
+            "get": {
+                "summary": "UC-IPC对照查询",
+                "description": "根据用户调用UC-IPC的接口，得到UC-IPC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "symbol",
+				            "in": "query",
+				            "description": "分类号（例如：2/1）",
+				            "type": "string",
+				            "required": true
+                    }               
+                    
+                ],
+                "tags": [
+                    "UC-IPC对照检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "UC-IPC对照检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "UC-IPC对照检索结果",
+					            "properties": {
+					                "simple_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文分类名称"
+					                },
+					                "zh_title_text": {
+					                    "type": "string",
+					                    "description": "中文分类名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+           "/api/patent/classification/fi/ipc": {
+            "get": {
+                "summary": "FI-IPC对照查询",
+                "description": "根据用户调用FI-IPC的接口，得到FI-IPC所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "symbol",
+				            "in": "query",
+				            "description": "分类号（例如：A01B3/02）",
+				            "type": "string",
+				            "required": true
+                    }               
+                    
+                ],
+                "tags": [
+                    "FI-IPC对照检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FI-IPC对照检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "FI-IPC对照检索结果",
+					            "properties": {
+					                "simple_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文分类名称"
+					                },
+					                "zh_title_text": {
+					                    "type": "string",
+					                    "description": "中文分类名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },  
+         "/api/patent/classification/isic/ipc": {
+            "get": {
+                "summary": "国民经济分类-IPC对照查询",
+                "description": "根据用户调用国民经济分类-IPC的接口，得到国民经济分类所有的代码集",
+                "parameters": [
+                    	{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {		
+				            "name": "symbol",
+				            "in": "query",
+				            "description": "分类号（例如：C1362）",
+				            "type": "string",
+				            "required": true
+                    }               
+                    
+                ],
+                "tags": [
+                    "国民经济分类-IPC对照检索"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "国民经济分类-IPC对照检索结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "国民经济分类-IPC对照检索结果",
+					            "properties": {
+					                "simple_symbol": {
+					                    "type": "string",
+					                    "description": "分类号"
+					                },
+					                "uuid": {
+					                    "type": "string",
+					                    "description": "id"
+					                },
+					                "en_title_text": {
+					                    "type": "string",
+					                    "description": "英文分类名称"
+					                },
+					                "zh_title_text": {
+					                    "type": "string",
+					                    "description": "中文分类名称"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        },  
+        "/api/patent/classification/f/term/fi": {
+            "get": {
+                "summary": "FI对照FTerm分类查询",
+                "description": "根据FI分类编号查询 FTerm中所对应的分类信息",
+                "parameters": [
+                		{
+				            "$ref": "#/parameters/clientId"
+				        },
+				        {
+				            "$ref": "#/parameters/access_token"
+				        },
+				        {
+				            "$ref": "#/parameters/scope"
+				        },
+                    {
+				            "name": "symbol",
+				            "in": "query",
+				            "description": "FI分类查询的分类号(例：C01B3/00)",
+				            "type": "string",
+				            "required": true
+                    }
+                    
+                ],
+                "tags": [
+                    "FI对照FTerm分类类查询"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FI分类对照查询FTerm的分类结果",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+					            "description": "FI分类对照查询FTerm的分类结果",
+					            "properties": {
+					            	"symbol":{
+					            		"type": "string",
+					                    "description": "分类号"
+					            	},
+					                "en_text": {
+					                    "type": "string",
+					                    "description": "英文内容"
+					                },
+					                "jp_text":{
+					                 	"type": "string",
+					                    "description": "日文内容"
+					                },
+					                "number2_text":{
+					                 	"type": "string",
+					                    "description": "FTerm类型"
+					                }
+					            }
+                            }
+                        }
+                    }
+                }
+            }
+        }    
+	         
+	         
+	         
+    	},
+    	
+    	"parameters": {
+	        "clientId": {
+		      "name": "client_id",
+		      "in": "query",
+		      "description": "用户应用的client_id",
+		      "type": "number",
+		      "required": true
+		    },
+		     "access_token": {
+		      "name": "access_token",
+		      "in": "query",
+		      "description": "用户应用的token，比如：c75886de-0559-4e8a-870d-e5480c674c2b",
+		      "type": "number",
+		      "required": true
+		    },
+		    "scope": {
+		      "name": "scope",
+		      "in": "query",
+		      "description": "默认值为：read_cn即可",
+		      "type": "number",
+		      "required": true
+		    },
+	        "express": {
+	            "name": "express",
+	            "in": "query",
+	            "description": "检索表达式,例如:名称=(计算机)",
+	            "type": "string",
+	            "required": true
+	        },
+	         "page": {
+	            "name": "page",
+	            "in": "query",
+	            "description": "页码值,例如:1",
+	            "type": "string",
+	            "required": true
+	        },
+		    "page_row": {
+		      "name": "page_row",
+		      "in": "query",
+		      "description": "<strong>每页显示的数据条数，最大值100(总条数最多只能返回查询条件前10000条数据)</strong>",
+		      "type": "string",
+		      "required": false
+		    },
+	        "text": {
+	            "name": "text",
+	            "in": "query",
+	            "description": "文本内容",
+	            "type": "string",
+	            "required": true
+	        },
+	        "pid":{
+	       		"name": "pid",
+	            "in": "query",
+	            "description": "专利数据主键id",
+	            "type": "string",
+	            "required": true
+	         },
+	         "pno":{
+	        	"name": "pno",
+	            "in": "query",
+	            "description": "文献号原始",
+	            "type": "string",
+	            "required": false
+	         },
+	        "categoryColumn": {
+	            "name": "categoryColumn",
+	            "in": "query",
+	            "description": "<span id='categoryColumnsSapn'><button type='button' class='defineButton' onclick='showCataColoumn(this)'>专利分类统计字段</button></span>",
+	            "type": "string",
+	            "required": true
+	        },
+		    "sort_column": {
+		      "name": "sort_column",
+		      "in": "query",
+		      "description": "<strong>排序字段名称前加'+'是升序，加'-'是降序，其他字段不支持排序。例如：+AD</strong>",
+		      "type": "string",
+		      "required": false
+		    },
+	        "lang":{
+	        	"name": "lang",
+	            "in": "query",
+	            "description": "语言类型,原文:o 中文:cn 英文:en",
+	            "type": "string",
+	            "required": true
+	        },
+	        "pns":{
+	        	"name": "pns",
+	            "in": "query",
+	            "description": "公布号标准",
+	            "type": "string",
+	            "required": true
+	        }
+	        
+   	 	},
+    	
+    	 "definitions": {
+	        "ListPatent": {
+	            "type": "object",
+	            "description": "专利检索结果",
+	            "properties": {
+	                "pid": {
+	                    "type": "string",
+	                    "description": "专利编码"
+                	},
+	                "tic": {
+	                    "type": "string",
+	                    "description": "标题-中文"
+	                },
+	                "tie": {
+	                    "type": "string",
+	                    "description": "标题-英文"
+	                },
+	                "tio": {
+	                    "type": "string",
+	                    "description": "标题-原始"
+	                },
+	                "ano": {
+	                    "type": "string",
+	                    "description": "申请号-原始"
+	                },
+	                "ad": {
+	                    "type": "string",
+	                    "description": "申请日"
+	                },
+	                "pd": {
+	                    "type": "string",
+	                    "description": "公开日"
+	                },
+	                "pno": {
+	                    "type": "string",
+	                    "description": "文献号-原始"
+	                },
+	                "apo": {
+	                    "type": "string",
+	                    "description": "申请人-原始"
+	                },
+	                "ape": {
+	                    "type": "string",
+	                    "description": "申请人-英文"
+	                },
+	                "apc": {
+	                    "type": "string",
+	                    "description": "申请人-中文"
+	                },
+	                "ipc": {
+	                    "type": "string",
+	                    "description": "IPC"
+	                },
+	                "lc": {
+	                    "type": "string",
+	                    "description": "洛迦诺分类"
+	                },
+	                "vu": {
+	                    "type": "string",
+	                    "description": "专利强度"
+	                },
+	                "abso": {
+	                    "type": "string",
+	                    "description": "摘要-原始语种"
+	                },
+	                "abse": {
+	                    "type": "string",
+	                    "description": "摘要-英文"
+	                },
+	                "absc": {
+	                    "type": "string",
+	                    "description": "摘要-中文"
+	                },
+	                "imgtitle": {
+	                    "type": "string",
+	                    "description": "缩略图"
+	                },
+	                "imgname": {
+	                    "type": "string",
+	                    "description": "缩略图名称"
+	                },
+	                "lssc": {
+	                    "type": "string",
+	                    "description": "当前权利状态"
+	                },
+	                "pdt": {
+	                    "type": "string",
+	                    "description": "专利类型"
+	                },
+	                 "debec": {
+	                    "type": "string",
+	                    "description": "简要说明-中文"
+	                },
+	                 "debeo": {
+	                    "type": "string",
+	                    "description": "简要说明-原始"
+	                },
+	                 "debee": {
+	                    "type": "string",
+	                    "description": "简要说明-英文"
+	                },
+	                 "imgo": {
+	                    "type": "string",
+	                    "description": "原始图"
+	                },
+	                "pdfexist": {
+	                    "type": "string",
+	                    "description": "是否存在PDF"
+	                },
+	                "pns": {
+	                    "type": "string",
+	                    "description": "文献号-标准格式"
+	                },
+	                "sfpns": {
+	                    "type": "string",
+	                    "description": "代表性文献号"
+	                },
+	                "inc": {
+	                    "type": "string",
+	                    "description": "发明人-中文"
+	                },
+	                "ine": {
+	                    "type": "string",
+	                    "description": "发明人-英文"
+	                },
+	                "ino": {
+	                    "type": "string",
+	                    "description": "发明人-原文"
+	                },
+	                "agc": {
+	                    "type": "string",
+	                    "description": "代理人-中文"
+	                },
+	                "age": {
+	                    "type": "string",
+	                    "description": "代理人-英文"
+	                },
+	                "ago": {
+	                    "type": "string",
+	                    "description": "代理人-原文"
+	                },
+	                "asc": {
+	                    "type": "string",
+	                    "description": "专利权人-中文"
+	                },
+	                "ase": {
+	                    "type": "string",
+	                    "description": "专利权人-英文"
+	                },
+	                "aso": {
+	                    "type": "string",
+	                    "description": "专利权人-原文"
+	                },
+	                "exc": {
+	                    "type": "string",
+	                    "description": "审查员-中文"
+	                },
+	                "exe": {
+	                    "type": "string",
+	                    "description": "审查员人-英文"
+	                },
+	                "exo": {
+	                    "type": "string",
+	                    "description": "审查员-原文"
+	                }
+	            }
+            },
+            "SynonymsResult" : {
+            	"type": "object",
+	            "description": "同义词转换后的结果",
+	            "properties": {
+	                "express": {
+	                    "type": "string",
+	                    "description": "同义词转换后的表达式"
+                	}
+                }
+            },
+            "CrossResult" : {
+            	"type": "object",
+	            "description": "跨语言转换后的结果",
+	            "properties": {
+	                "express": {
+	                    "type": "string",
+	                    "description": "跨语言转换后的表达式"
+                	}
+                }
+            },
+            "StatisticsResult": {
+	            "type": "object",
+	            "description": "分类统计结果",
+	            "properties": {
+	                "column": {
+	                    "type": "string",
+	                    "description": "列"
+	                },
+	                "key": {
+	                    "type": "string",
+	                    "description": "关键字"
+	                },
+	                "count": {
+	                    "type": "string",
+	                    "description": "计数"
+	                }
+	            }
+	        },
+            "PatentDetail" : {
+            	"type": "object",
+	            "description": "返回专利的详细信息",
+	            "properties": {
+                	"baseProperties" : {
+                		"$ref": "#/definitions/catalogPatent"
+                	},
+                	"fimalyObj" : {
+			         	"$ref": "#/definitions/fimalyPatent"
+                	},
+                	"cits" : {
+                		"$ref": "#/definitions/citsPatent"
+                	},
+                	"citByRefds" : {
+                		"$ref": "#/definitions/citByRefdsPatent"
+                	},
+                	"feeNotices":{
+                		"$ref": "#/definitions/feeNoticesPatent"
+                	}
+                }
+            },
+            "catalogPatent" : {
+            	"type": "object",
+	            "description": "本条专利属性",
+	            "properties": {
+	            	"pid": {
+	                    "type": "string",
+	                    "description" : "专利编码"
+                	},
+                	"tio": {
+	                    "type": "string",
+	                    "description" : "名称原始"
+                	},
+                	"ano": {
+	                    "type": "string",
+	                    "description" : "申请号原始"
+                	},
+                	 "pno": {
+	                    "type": "string",
+	                    "description": "公布号原始"
+                	},
+                	 "ad": {
+	                    "type": "string",
+	                    "description": "申请日"
+                	},
+                	 "pd": {
+	                    "type": "string",
+	                    "description": "公布日"
+                	},
+                	"apo" :{
+                		"type": "string",
+	                    "description": "申请人原始"
+                	},
+                	"ino" :{
+                		"type": "string",
+	                    "description": "发明人原始"
+                	},
+                	"ap1adc" :{
+                		"type": "string",
+	                    "description": "申请人地址中文"
+                	},
+                	"ap1a" :{
+                		"type": "string",
+	                    "description": "申请人区域代码"
+                	},
+                	"aso" :{
+                		"type": "string",
+	                    "description": "专利权人原始"
+                	},
+                	"cpc" :{
+                		"type": "string",
+	                    "description": "CPC"
+                	},
+                	"ipc" :{
+                		"type": "string",
+	                    "description": "IPC"
+                	},
+                	"uc" :  {
+                		"type": "string",
+	                    "description": "UC"
+                	},
+                	"fi" :  {
+                		"type": "string",
+	                    "description": "FI"
+                	},
+                	"fterm" :  {
+                		"type": "string",
+	                    "description": "FTERM"
+                	},
+                	"prno" :{
+                		"type": "string",
+	                    "description": "优先权原始"
+                	},
+                	"agc" :{
+                		"type": "string",
+	                    "description": "代理机构"
+                	},
+                	"ag" :{
+                		"type": "string",
+	                    "description": "代理人"
+                	},
+                	"cie" :{
+                		"type": "string",
+	                    "description": "审查员原始"
+                	},
+                	"pctao" :{
+                		"type": "string",
+	                    "description": "国际申请原始"
+                	},
+                	"pctad" :{
+                		"type": "string",
+	                    "description": "国际申请日"
+                	},
+                	"pctpo" :{
+                		"type": "string",
+	                    "description": "国际公布原始"
+                	},
+                	"pctpd" :{
+                		"type": "string",
+	                    "description": "国际公布日"
+                	},
+                	"pctsd" :{
+                		"type": "string",
+	                    "description": "进入国家日"
+                	},
+                	"dppad" :{
+                		"type": "string",
+	                    "description": "分案申请"
+                	},
+                	"debeo" :{
+                		"type": "string",
+	                    "description": "简要说明原始"
+                	},
+                	"debec" :{
+                		"type": "string",
+	                    "description": "简要说明中文"
+                	},
+                	"debee" :{
+                		"type": "string",
+	                    "description": "简要说明英文"
+                	},
+                	"imgArray" :{
+                		"type": "string",
+	                    "description": "附图集合"
+                	},
+                	"absoHTML" :{
+                		"type": "string",
+	                    "description": "摘要原始页面"
+                	},
+                	"absenHTML" :{
+                		"type": "string",
+	                    "description": "摘要英文页面"
+                	},
+                	"abscnHTML" :{
+                		"type": "string",
+	                    "description": "摘要中文页面"
+                	},
+                	"claoHTML" :{
+                		"type": "string",
+	                    "description": "权利要求书原文"
+                	},
+                	"claenHTML" :{
+                		"type": "string",
+	                    "description": "权利要求书英文"
+                	},
+                	"clacnHTML" :{
+                		"type": "string",
+	                    "description": "权利要求书中文"
+                	},
+                	"desoHTML" :{
+                		"type": "string",
+	                    "description": "说明书原文"
+                	},
+                	"desenHTML" :{
+                		"type": "string",
+	                    "description": "说明书英文"
+                	},
+                	"descnHTML" :{
+                		"type": "string",
+	                    "description": "说明书中文"
+                	},
+                	"pdt" :{
+                		"type": "string",
+	                    "description": "专利类型"
+                	},
+                	"lssc" :{
+                		"type": "string",
+	                    "description": "当前权利状态"
+                	},
+                	"aspo" :{
+                		"type": "string",
+	                    "description": "当前权利人原始"
+                	},
+                	"aspc" :{
+                		"type": "string",
+	                    "description": "当前权利人中文"
+                	},
+                	"aspe" :{
+                		"type": "string",
+	                    "description": "当前权利人英文"
+                	},
+                	"lc" :{
+                		"type": "string",
+	                    "description": "洛迦诺"
+                	}
+				}
+			},
+			"fimalyPatent" : {
+				"type": "object",
+	            "description": "同族专利属性",
+	            "properties": {
+                	"fimalyNum" :{
+                		"type": "string",
+	                    "description": "同族专利数量"
+                	},
+                	"ano" :{
+                		"type": "string",
+	                    "description": "申请号原始"
+                	},
+	            	"pno" :{
+                		"type": "string",
+	                    "description": "公布号原始"
+                	},
+                	"pid" :{
+                		"type": "string",
+	                    "description": "专利编码"
+                	},
+                	"pns" :{
+                		"type": "string",
+	                    "description": "公布号标准"
+                	},
+                	"pd" :{
+                		"type": "string",
+	                    "description": "公布日"
+                	},
+                	"ad" :{
+                		"type": "string",
+	                    "description": "申请日"
+                	},
+                	"tic" :{
+                		"type": "string",
+	                    "description": "名称中文"
+                	},
+                	"prno" :{
+                		"type": "string",
+	                    "description": "优先权原始"
+                	}
+	            }
+			},
+			"citsPatent" : {
+				"type": "object",
+	            "description": "引证专利属性",
+	            "properties": {
+                	"citsNum" :{
+                		"type": "string",
+	                    "description": "引证专利数量"
+                	},
+                	"ano" :{
+                		"type": "string",
+	                    "description": "申请号原始"
+                	},
+                	"pno" :{
+                		"type": "string",
+	                    "description": "公布号原始"
+                	},
+                	"ad" :{
+                		"type": "string",
+	                    "description": "申请日"
+                	},
+                	"pd" :{
+                		"type": "string",
+	                    "description": "公布日"
+                	},
+                	"tic" :{
+                		"type": "string",
+	                    "description": "名称中文"
+                	},
+                	"cis" :{
+                		"type": "string",
+	                    "description": "引证来源"
+                	},
+                	"cisType" :{
+                		"type": "string",
+	                    "description": "引证来源类型"
+                	}
+                 }
+			  },
+			  "citByRefdsPatent"  :{
+				    "type": "object",
+		            "description": "被引证专利属性",
+		            "properties": {
+	                	"citByRefdsNum" :{
+	                		"type": "string",
+		                    "description": "被引证专利数量"
+	                	},
+	                	"ano" :{
+	                		"type": "string",
+		                    "description": "申请号原始"
+	                	},
+	                	"pno" :{
+	                		"type": "string",
+		                    "description": "公布号原始"
+	                	},
+	                	"ad" :{
+	                		"type": "string",
+		                    "description": "申请日"
+	                	},
+	                	"pd" :{
+	                		"type": "string",
+		                    "description": "公布日"
+	                	},
+	                	"tic" :{
+	                		"type": "string",
+		                    "description": "名称中文"
+	                	},
+	                	"cis" :{
+	                		"type": "string",
+		                    "description": "引证来源"
+	                	},
+	                	"cisType" :{
+	                		"type": "string",
+		                    "description": "引证来源类型"
+	                	}
+	                }
+	             },
+	            "feeNoticesPatent":{
+					 "type": "object",
+		             "description": "国知局信息",
+		             "properties": {
+	                	"pif" :{
+	                		"type": "string",
+		                    "description": "费用金额"
+	                	},
+	                	"pift" :{
+	                		"type": "string",
+		                    "description": "费用种类"
+	                	},
+	                	"pir" :{
+	                		"type": "string",
+		                    "description": "收据号"
+	                	},
+	                	"piabn" :{
+	                		"type": "string",
+		                    "description": "缴费人信息"
+	                	},
+	                	"pips" :{
+	                		"type": "string",
+		                    "description": "处理状态"
+	                	},
+	                	"pipd" :{
+	                		"type": "string",
+		                    "description": "缴费日"
+	                	},
+		            	"ntpd" :{
+	                		"type": "string",
+		                    "description": "通知发文日"
+	                	},
+	                	"ntrn" :{
+	                		"type": "string",
+		                    "description": "通知挂号"
+	                	},
+	                	"ntabn" :{
+	                		"type": "string",
+		                    "description": "通知收件人姓名"
+	                	},
+	                	"ntt" :{
+	                		"type": "string",
+		                    "description": "通知书类型"
+	                	},
+	                	"nttd" :{
+	                		"type": "string",
+		                    "description": "通知书类型说明"
+	                	},
+	                	"pcpd" :{
+	                		"type": "string",
+		                    "description": "专利证书发文日"
+	                	},
+	                	"pcrn" :{
+	                		"type": "string",
+		                    "description": "专利证书挂号"
+	                	},
+	                	"pcabn" :{
+	                		"type": "string",
+		                    "description": "专利证书收件人姓名"
+	                	},
+	                	"pcabt" :{
+	                		"type": "string",
+		                    "description": "专利证书收件人地址"
+	                	}
+	                 }         
+	            },
+	            "LawResult":{
+	            	"type": "object",
+		             "description": "法律状态返回结果",
+		             "properties": {
+	                	"prsseqno" :{
+	                		"type": "string",
+		                    "description": "法律状态序号"
+	                	},
+	                	"ilsad" :{
+	                		"type": "string",
+		                    "description": "法律状态公告日"
+	                	},
+	                	"ilsc" :{
+	                		"type": "string",
+		                    "description": "法律状态代码"
+	                	},
+	                	"ilsso" :{
+	                		"type": "string",
+		                    "description": "法律状态-原始"
+	                	},
+	                	"ilssc" :{
+	                		"type": "string",
+		                    "description": "法律状态-中文"
+	                	},
+	                	"ilsse" :{
+	                		"type": "string",
+		                    "description": "法律状态-英文"
+	                	},
+	                	"ilsio" :{
+	                		"type": "string",
+		                    "description": "法律状态信息-原始"
+	                	},
+	                	"ilsic" :{
+	                		"type": "string",
+		                    "description": "法律状态信息-中文"
+	                	},
+	                	"ilsie" :{
+	                		"type": "string",
+		                    "description": "法律状态信息-英文"
+	                	},
+	                	"ilsay" :{
+	                		"type": "string",
+		                    "description": "法律状态公告年(线上加工)"
+	                	},
+	                	"ilsam" :{
+	                		"type": "string",
+		                    "description": "法律状态公告月(线上加工)"
+	                	}
+	                }
+	            },
+	            "RelatedResult" : {
+	            	"type": "object",
+		            "description": "相关数据的返回结果",
+		            "properties": {
+	                	"patResult" : {
+	                		"$ref": "#/definitions/patResult"
+	                	},
+	                	"iseResult" : {
+				         	"$ref": "#/definitions/iseResult"
+	                	},
+	                	"stdResult" : {
+	                		"$ref": "#/definitions/stdResult"
+	                	},
+	                	"decResult" : {
+	                		"$ref": "#/definitions/decResult"
+	                	},
+	                	"cseResult":{
+	                		"$ref": "#/definitions/cseResult"
+	                	},
+	                	"traResult":{
+	                		"$ref": "#/definitions/traResult"
+	                	}
+	                }
+	            },
+	             "patResult":{
+	            	"type": "object",
+		            "description": "专利部分相关数据结果",
+		            "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "相似专利编号"
+	                	},
+	                	"ano" :{
+	                		"type": "string",
+		                    "description": "申请号原始"
+	                	},
+	                	"pid" :{
+	                		"type": "string",
+		                    "description": "专利编码"
+	                	},
+	                	"pno" :{
+	                		"type": "string",
+		                    "description": "公布号原始"
+	                	},
+	                	"ad" :{
+	                		"type": "string",
+		                    "description": "申请日"
+	                	},
+	                	"tio" :{
+	                		"type": "string",
+		                    "description": "名称原始"
+	                	},
+	                	"ap1o" :{
+	                		"type": "string",
+		                    "description": "第一申请人原始"
+	                	},
+	                	"ipc" :{
+	                		"type": "string",
+		                    "description": "IPC"
+	                	}
+	              	 }
+	             },
+	            "iseResult":{
+	            	"type": "object",
+		            "description": "相关数据结果",
+		            "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "相似期刊编号"
+	                	},
+	                	"jid" :{
+	                		"type": "string",
+		                    "description": "数据编码扩展"
+	                	},
+	                	"atio" :{
+	                		"type": "string",
+		                    "description": "标题原文"
+	                	},
+	                	"ajto" :{
+	                		"type": "string",
+		                    "description": "文献来源原文"
+	                	},
+	                	"aao" :{
+	                		"type": "string",
+		                    "description": "作者原文"
+	                	},
+	                	"aafo" :{
+	                		"type": "string",
+		                    "description": "作者单位原文"
+	                	},
+	                	"apy" :{
+	                		"type": "string",
+		                    "description": "出版年"
+	                	},
+	                	"iss" :{
+	                		"type": "string",
+		                    "description": "期"
+	                	}
+	              	 }
+	             },
+	             "stdResult":{
+	            	"type": "object",
+		            "description": "相关数据结果",
+		            "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "相关标准ID"
+	                	},
+	                	"sid" :{
+	                		"type": "string",
+		                    "description": "序号扩展"
+	                	},
+	                	"stn" :{
+	                		"type": "string",
+		                    "description": "标准唯一标识"
+	                	},
+	                	"sc" :{
+	                		"type": "string",
+		                    "description": "标准类别"
+	                	},
+	                	"sn" :{
+	                		"type": "string",
+		                    "description": "标准号"
+	                	},
+	                	"sbd" :{
+	                		"type": "string",
+		                    "description": "发布日期"
+	                	},
+	                	"stio" :{
+	                		"type": "string",
+		                    "description": "标准名称原文"
+	                	},
+	                	"sdco" :{
+	                		"type": "string",
+		                    "description": "起草单位原文"
+	                	},
+	                	"ss" :{
+	                		"type": "string",
+		                    "description": "标准状态"
+	                	}
+	              	 }
+	             },
+	             "decResult":{
+	            	"type": "object",
+		            "description": "相关数据结果",
+		            "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "相关判例ID"
+	                	},
+	                	"cid" :{
+	                		"type": "string",
+		                    "description": "决定号扩展"
+	                	},
+	                	"ano" :{
+	                		"type": "string",
+		                    "description": "专利申请号"
+	                	},
+	                	"ridn" :{
+	                		"type": "string",
+		                    "description": "决定号"
+	                	},
+	                	"ridt" :{
+	                		"type": "string",
+		                    "description": "决定类型"
+	                	},
+	                	"ridd" :{
+	                		"type": "string",
+		                    "description": "决定日"
+	                	},
+	                	"riapo" :{
+	                		"type": "string",
+		                    "description": "请求人原文"
+	                	},
+	                	"rilb" :{
+	                		"type": "string",
+		                    "description": "法律依据"
+	                	},
+	                	"ridr" :{
+	                		"type": "string",
+		                    "description": "决定结果代码"
+	                	},
+	                	"ridv" :{
+	                		"type": "string",
+		                    "description": "决定结果内容"
+	                	}
+	              	 }
+	             },
+	             "cseResult":{
+	            	"type": "object",
+		            "description": "相关数据结果",
+		            "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "裁判文书ID"
+	                	},
+	                	"cid" :{
+	                		"type": "string",
+		                    "description": "案号扩展"
+	                	},
+	                	"can" :{
+	                		"type": "string",
+		                    "description": "案件唯一标识"
+	                	},
+	                	"cdn" :{
+	                		"type": "string",
+		                    "description": "案号"
+	                	},
+	                	"cjd" :{
+	                		"type": "string",
+		                    "description": "判决日"
+	                	},
+	                	"plo" :{
+	                		"type": "string",
+		                    "description": "原告或上诉人原文"
+	                	},
+	                	"deo" :{
+	                		"type": "string",
+		                    "description": "被告或被上诉人原文"
+	                	},
+	                	"tpo" :{
+	                		"type": "string",
+		                    "description": "第三人原文"
+	                	},
+	                	"ano" :{
+	                		"type": "string",
+		                    "description": "申请号原始"
+	                	},
+	                	"rn" :{
+	                		"type": "string",
+		                    "description": "商标注册号"
+	                	},
+	                	"ja" :{
+	                		"type": "string",
+		                    "description": "判决金额"
+	                	}
+	              	 }
+	             },
+	            "traResult":{
+	            	"type": "object",
+		             "description": "相关数据结果",
+		             "properties": {
+	                	"id" :{
+	                		"type": "string",
+		                    "description": "相关商标ID"
+	                	},
+	                	"rn" :{
+	                		"type": "string",
+		                    "description": "注册号"
+	                	},
+	                	"rd" :{
+	                		"type": "string",
+		                    "description": "注册日期"
+	                	},
+	                	"mno" :{
+	                		"type": "string",
+		                    "description": "商标名称原文"
+	                	},
+	                	"cs" :{
+	                		"type": "string",
+		                    "description": "当前权利状态"
+	                	},
+	                	"tmsg" :{
+	                		"type": "string",
+		                    "description": "图形缩略图"
+	                	},
+	                	"gso" :{
+	                		"type": "string",
+		                    "description": "商品服务列表原文"
+	                	},
+	                	"tid" :{
+	                		"type": "string",
+		                    "description": "序号扩展"
+	                	},
+	                	"tmid" :{
+	                		"type": "string",
+		                    "description": "序号"
+	                	},
+	                	"tmdb" :{
+	                		"type": "string",
+		                    "description": "数据库来源"
+	                	},
+	                	"hn" :{
+	                		"type": "string",
+		                    "description": "申请人名称"
+	                	},
+	                	"nc" :{
+	                		"type": "string",
+		                    "description": "尼斯分类"
+	                	}
+	                }
+	            },
+	            "PDFDownload" :{
+	            	"type": "object",
+		            "description": "下载PDF的地址",
+		            "properties": {
+		            	"nginxPath" :{
+	                		"type": "string",
+		                    "description": "下载PDF的地址"
+	                	}
+	                }
+	            },
+	            "Error": {
+		            "type": "object",
+		            "properties": {
+		                "code": {
+		                    "type": "integer",
+		                    "format": "int32"
+		                },
+		                "message": {
+		                    "type": "string"
+		                },
+		                "fields": {
+		                    "type": "string"
+		                }
+		            }
+		        }
+		}
+			
+        
+}
